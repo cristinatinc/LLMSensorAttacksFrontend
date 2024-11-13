@@ -1,11 +1,18 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 
 export default function ProcessInputs() {
-  const [input1, setInput1] = useState('')
-  const [input2, setInput2] = useState('')
+  const [formData, setFormData] = useState({ input1: '', input2: '' })
   const [result, setResult] = useState('')
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -14,53 +21,53 @@ export default function ProcessInputs() {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ input1, input2 }),
+      body: JSON.stringify(formData),
     })
     const data = await response.json()
     setResult(data.result)
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-4">Process Inputs</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="input1" className="block text-sm font-medium text-gray-700">
-            Input 1
-          </label>
-          <input
-            type="text"
-            id="input1"
-            value={input1}
-            onChange={(e) => setInput1(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-        </div>
-        <div>
-          <label htmlFor="input2" className="block text-sm font-medium text-gray-700">
-            Input 2
-          </label>
-          <input
-            type="text"
-            id="input2"
-            value={input2}
-            onChange={(e) => setInput2(e.target.value)}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Process
-        </button>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Process Inputs</CardTitle>
+        <CardDescription>Enter two inputs to process:</CardDescription>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="input1">Input 1</Label>
+            <Input
+              id="input1"
+              name="input1"
+              value={formData.input1}
+              onChange={handleFormChange}
+              placeholder="Enter first input"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="input2">Input 2</Label>
+            <Input
+              id="input2"
+              name="input2"
+              value={formData.input2}
+              onChange={handleFormChange}
+              placeholder="Enter second input"
+              required
+            />
+          </div>
+        </CardContent>
+        <CardFooter className="flex flex-col items-start space-y-4">
+          <Button type="submit">Process</Button>
+          {result && (
+            <div className="w-full">
+              <h3 className="text-lg font-semibold">Result:</h3>
+              <p className="mt-2 p-2 bg-gray-100 rounded">{result}</p>
+            </div>
+          )}
+        </CardFooter>
       </form>
-      {result && (
-        <div className="mt-4">
-          <h3 className="text-lg font-semibold">Result:</h3>
-          <p>{result}</p>
-        </div>
-      )}
-    </div>
+    </Card>
   )
 }

@@ -4,11 +4,14 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Maximize2, Minimize2} from 'lucide-react'
 
 export default function AIChatbox() {
   const [messages, setMessages] = useState<{ role: string, content: string }[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
@@ -59,12 +62,15 @@ export default function AIChatbox() {
     }
   }
 
-  return (
-    <Card className="w-full flex flex-col h-[600px]">
-      <CardHeader>
+  const ChatContent = () => (
+    <>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100">AI Chatbox</CardTitle>
+        <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(true)}>
+          <Maximize2 className="h-4 w-4" />
+        </Button>
       </CardHeader>
-      <CardContent className="flex-grow overflow-y-auto space-y-4 p-4">
+      <CardContent className="h-[300px] overflow-y-auto space-y-4 p-4">
         {messages.map((m, index) => (
           <div key={index} className={`p-3 rounded-lg ${m.role === 'user' ? 'bg-blue-100 dark:bg-blue-900 ml-auto' : 'bg-gray-100 dark:bg-gray-700 mr-auto'} max-w-[80%]`}>
             <p className={`text-sm ${m.role === 'user' ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200'}`}>
@@ -88,6 +94,44 @@ export default function AIChatbox() {
           </Button>
         </form>
       </CardFooter>
-    </Card>
+    </>
+  )
+
+  return (
+    <>
+      <Card className="w-full">
+        <ChatContent />
+      </Card>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] h-[600px] flex flex-col">
+          <DialogHeader className="flex flex-row items-center justify-between">
+            <DialogTitle>AI Chatbox</DialogTitle>
+    
+          </DialogHeader>
+          <div className="flex-grow overflow-y-auto space-y-4 p-4">
+            {messages.map((m, index) => (
+              <div key={index} className={`p-3 rounded-lg ${m.role === 'user' ? 'bg-blue-100 dark:bg-blue-900 ml-auto' : 'bg-gray-100 dark:bg-gray-700 mr-auto'} max-w-[80%]`}>
+                <p className={`text-sm ${m.role === 'user' ? 'text-blue-800 dark:text-blue-200' : 'text-gray-800 dark:text-gray-200'}`}>
+                  {m.content}
+                </p>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+          <form onSubmit={handleSubmit} className="flex w-full space-x-2 p-4">
+            <Input
+              value={input}
+              onChange={handleInputChange}
+              placeholder="Type your message..."
+              className="flex-grow"
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Sending...' : 'Send'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

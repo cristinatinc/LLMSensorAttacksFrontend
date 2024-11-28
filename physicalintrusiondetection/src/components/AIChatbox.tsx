@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Maximize2, Minimize2} from 'lucide-react'
+import { Maximize2, Minimize2, MessageSquare, Send } from 'lucide-react'
 
 export default function AIChatbox() {
   const [messages, setMessages] = useState<{ role: string, content: string }[]>([])
@@ -13,12 +13,19 @@ export default function AIChatbox() {
   const [isLoading, setIsLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
   useEffect(scrollToBottom, [messages])
+
+  useEffect(() => {
+    if (!isDialogOpen) {
+      inputRef.current?.focus()
+    }
+  }, [isDialogOpen])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInput(e.target.value)
@@ -59,13 +66,17 @@ export default function AIChatbox() {
       ])
     } finally {
       setIsLoading(false)
+      inputRef.current?.focus()
     }
   }
 
   const ChatContent = () => (
     <>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100">AI Chatbox</CardTitle>
+        <CardTitle className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
+          <MessageSquare className="w-6 h-6 mr-2" />
+          AI Chatbox
+        </CardTitle>
         <Button variant="ghost" size="icon" onClick={() => setIsDialogOpen(true)}>
           <Maximize2 className="h-4 w-4" />
         </Button>
@@ -83,6 +94,7 @@ export default function AIChatbox() {
       <CardFooter>
         <form onSubmit={handleSubmit} className="flex w-full space-x-2">
           <Input
+            ref={inputRef}
             value={input}
             onChange={handleInputChange}
             placeholder="Type your message..."
@@ -90,7 +102,7 @@ export default function AIChatbox() {
             disabled={isLoading}
           />
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Sending...' : 'Send'}
+            {isLoading ? 'Sending...' : <Send className="h-4 w-4" />}
           </Button>
         </form>
       </CardFooter>
@@ -104,10 +116,14 @@ export default function AIChatbox() {
       </Card>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[800px] h-[600px] flex flex-col">
-          <DialogHeader className="flex flex-row items-center justify-between">
-            <DialogTitle>AI Chatbox</DialogTitle>
-    
-          </DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between">
+        <DialogTitle className="flex items-center">
+            <MessageSquare className="w-6 h-6 mr-2" />
+                AI Chatbox
+        </DialogTitle>
+
+        </DialogHeader>
+
           <div className="flex-grow overflow-y-auto space-y-4 p-4">
             {messages.map((m, index) => (
               <div key={index} className={`p-3 rounded-lg ${m.role === 'user' ? 'bg-blue-100 dark:bg-blue-900 ml-auto' : 'bg-gray-100 dark:bg-gray-700 mr-auto'} max-w-[80%]`}>
@@ -127,7 +143,7 @@ export default function AIChatbox() {
               disabled={isLoading}
             />
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Sending...' : 'Send'}
+              {isLoading ? 'Sending...' : <Send className="h-4 w-4" />}
             </Button>
           </form>
         </DialogContent>
